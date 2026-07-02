@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lección 10: El árbol de problemas - Escolaris</title>
+    <style>
+        /* Variables de Identidad Visual Escolaris */
+        :root {
+            --naranja-vibrante: #db6015;
+            --amarillo-calido: #f7be00;
+            --azul-oscuro: #244b5a;
+            --rojo-ladrillo: #993921;
+            --azul-claro: #f0f8ff;
+            --blanco: #ffffff;
+            --transparente-oscuro: rgba(36, 75, 90, 0.1);
+        }
+
+        /* Reset y General */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--azul-oscuro);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* Contenedor optimizado para iFrame en Canvas */
+        .canvas-container {
+            width: 100%;
+            max-width: 850px;
+            height: 580px;
+            background-color: var(--azul-claro);
+            position: relative;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+            overflow: hidden;
+            border: 4px solid var(--azul-oscuro);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Área de diapositivas */
+        .slides-wrapper {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px 80px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(50px);
+            transition: all 0.4s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        /* Elementos del Tema */
+        h1 {
+            color: var(--naranja-vibrante);
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: var(--azul-oscuro);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--azul-oscuro);
+            max-width: 650px;
+            margin-bottom: 20px;
+        }
+
+        strong {
+            color: var(--naranja-vibrante);
+        }
+
+        /* Flechas de Navegación Lateral */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--blanco);
+            border: 3px solid var(--azul-oscuro);
+            font-size: 28px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--amarillo-calido);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-btn:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        .nav-btn.prev {
+            left: 15px;
+        }
+
+        .nav-btn.next {
+            right: 15px;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Barra de Progreso Discreta */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(36, 75, 90, 0.2);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--naranja-vibrante);
+            width: 8.33%; /* 1/12 por defecto */
+            transition: width 0.4s ease;
+        }
+
+        /* Insignias e Indicadores */
+        .header-tag {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sub-tag {
+            background-color: var(--amarillo-calido);
+            color: var(--azul-oscuro);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* Tarjetas de Contenido */
+        .card-grid {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 680px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .info-card {
+            background-color: var(--blanco);
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--naranja-vibrante);
+            transition: transform 0.2s;
+        }
+
+        .info-card h3 {
+            color: var(--azul-oscuro);
+            margin-bottom: 10px;
+            font-size: 1.15rem;
+        }
+
+        /* Botones de opción interactiva */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .opt-btn {
+            background-color: var(--blanco);
+            border: 2px solid var(--azul-oscuro);
+            color: var(--azul-oscuro);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .opt-btn:hover {
+            background-color: #f7be0033;
+            border-color: var(--naranja-vibrante);
+        }
+
+        .opt-btn.correct-choice {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724;
+        }
+
+        .opt-btn.incorrect-choice {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
+        }
+
+        /* Paneles de retroalimentación */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 550px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            font-weight: 600;
+        }
+
+        .feedback-box.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .feedback-box.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .retry-btn {
+            background-color: var(--rojo-ladrillo);
+            color: var(--blanco);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .retry-btn:hover {
+            background-color: #b03e27;
+        }
+
+        /* Ilustración Árbol Interactivo (CSS Puro) */
+        .tree-explorer {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 320px;
+            margin: 10px auto;
+            background: var(--blanco);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        .tree-section {
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--blanco);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .tree-section:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .sec-leaves {
+            height: 90px;
+            background-color: #2e7d32;
+            border: 3px solid #1b5e20;
+        }
+
+        .sec-trunk {
+            height: 80px;
+            background-color: #795548;
+            border: 3px solid #5d4037;
+            width: 60%;
+            margin: 0 auto;
+        }
+
+        .sec-roots {
+            height: 90px;
+            background-color: #3e2723;
+            border: 3px solid #270f0f;
+        }
+
+        .explorer-desc {
+            min-height: 50px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--azul-oscuro);
+            font-size: 1.1rem;
+        }
+
+        /* Sello final */
+        .stamp {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 5px dashed var(--amarillo-calido);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--naranja-vibrante);
+            font-size: 1.1rem;
+            transform: rotate(-10deg);
+            margin: 20px auto;
+            background: rgba(247, 190, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        /* Ordenar por clics */
+        .order-container {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .order-item {
+            background-color: var(--blanco);
+            border: 2px dashed var(--azul-oscuro);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--azul-oscuro);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-num {
+            background-color: var(--amarillo-calido);
+            color: var(--azul-oscuro);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) rotate(-10deg); }
+            50% { transform: scale(1.05) rotate(-10deg); }
+            100% { transform: scale(1) rotate(-10deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="canvas-container">
+    <!-- Flechas de navegación -->
+    <button class="nav-btn prev" id="prevBtn" onclick="navigate(-1)">⬅️</button>
+    <button class="nav-btn next" id="nextBtn" onclick="navigate(1)">➡️</button>
+
+    <div class="slides-wrapper">
+
+        <!-- 1️⃣ PORTADA MOTIVADORA -->
+        <div class="slide active">
+            <div class="header-tag">Formación Ciudadana</div>
+            <div class="sub-tag">Lección 10 • 6° Primaria</div>
+            <h1>El Árbol de Problemas</h1>
+            <p>¡Hola! Te damos la bienvenida a una aventura interactiva para aprender a analizar desafíos de tu comunidad como todo un experto. ¿Listo para descubrir el poder de este árbol?</p>
+            <div style="font-size: 70px; margin-top: 10px;">🌳🕵️‍♂️</div>
+        </div>
+
+        <!-- 2️⃣ OBJETIVOS DE APRENDIZAJE -->
+        <div class="slide">
+            <h2>Nuestros Objetivos de Hoy</h2>
+            <p>Al terminar esta maravillosa guía digital, serás súper capaz de:</p>
+            <div class="card-grid">
+                <div class="info-card">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🗺️</div>
+                    <h3>Mapear desafíos</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Entender la diferencia entre la raíz de una situación y sus síntomas visibles.</p>
+                </div>
+                <div class="info-card" style="border-top-color: var(--amarillo-calido);">
+                    <div style="font-size: 40px; margin-bottom: 10px;">💡</div>
+                    <h3>Proponer soluciones</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Atacar los problemas directo en su origen para lograr cambios duraderos.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3️⃣ ACTIVACIÓN DE CONOCIMIENTOS PREVIOS -->
+        <div class="slide">
+            <h2>Activación: ¡Para Pensar!</h2>
+            <p>Imagínate que las hojas de una planta en tu ventana se vuelven amarillas y se secan. ¿Qué harías primero para solucionarlo de verdad?</p>
+            <div class="options-list">
+                <button class="opt-btn" onclick="checkActivation(this, false)">
+                    <span>🎨</span> Pintar las hojas de color verde para que se vean bonitas.
+                </button>
+                <button class="opt-btn" onclick="checkActivation(this, true)">
+                    <span>💧</span> Revisar la tierra, ver si le falta agua o nutrientes a la raíz.
+                </button>
+            </div>
+            <div id="fb-activation" class="feedback-box"></div>
+        </div>
+
+        <!-- 4️⃣ PALABRAS CLAVE -->
+        <div class="slide">
+            <h2>Nuestras Palabras Clave</h2>
+            <p>Tres conceptos indispensables que usaremos todo el tiempo:</p>
+            <div class="card-grid">
+                <div class="info-card" style="border-top-color: var(--azul-oscuro);">
+                    <h3>🌳 El Problema</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">Es el conflicto o necesidad principal de la comunidad que deseamos resolver.</p>
+                </div>
+                <div class="info-card" style="border-top-color: var(--rojo-ladrillo);">
+                    <h3>🌱 La Causa</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">La razón profunda u origen que produce el problema.</p>
+                </div>
+                <div class="info-card" style="border-top-color: var(--amarillo-calido);">
+                    <h3>🍂 El Efecto</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">La consecuencia o impacto directo que genera el problema.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5️⃣ CONTENIDO PRINCIPAL -->
+        <div class="slide">
+            <h2>¿Qué es el Árbol de Problemas?</h2>
+            <p>Es una <strong>herramienta visual</strong> con forma de árbol que sirve para organizar ideas.</p>
+            <p>Nos permite analizar un problema comunitario dividiéndolo en sus partes esenciales para que sea más fácil de solucionar. Se utiliza en todo el mundo por gobiernos y equipos vecinales.</p>
+            <div style="font-size: 60px;">📊🔍</div>
+        </div>
+
+        <!-- 6️⃣ EXPLORACIÓN VISUAL -->
+        <div class="slide">
+            <h2>¡Haz clic para Explorar!</h2>
+            <p>Toca cada parte del árbol para ver qué parte del problema representa:</p>
+            <div class="tree-explorer">
+                <div class="tree-section sec-leaves" onclick="exploreTree('leaves', '🍂 HOJAS Y RAMAS = EFECTOS: Son los resultados de la situación, lo que el vecindario siente directamente (ej. contaminación, tristeza, inseguridad).')">
+                    Hojas y Ramas (Efectos)
+                </div>
+                <div class="tree-section sec-trunk" onclick="exploreTree('trunk', '🌳 TRONCO = PROBLEMA CENTRAL: Es la situación específica que queremos analizar (ej. Acumulación de basura en el parque).')">
+                    Tronco (Problema Central)
+                </div>
+                <div class="tree-section sec-roots" onclick="exploreTree('roots', '🌱 RAÍCES = CAUSAS: Son los motivos profundos que generaron el problema (ej. Falta de botes de basura, poca educación ambiental).')">
+                    Raíces (Causas Raíz)
+                </div>
+            </div>
+            <div class="explorer-desc" id="exploreText">¡Toca una parte del árbol para comenzar!</div>
+        </div>
+
+        <!-- 7️⃣ ACTIVIDAD DE COMPRENSIÓN -->
+        <div class="slide" id="comprension-slide">
+            <h2>¿Cuál es la Raíz?</h2>
+            <p>Si el problema central es: <strong>"Los accidentes en bicicleta han aumentado en la calle principal"</strong>. ¿Cuál de las siguientes opciones representa la causa o raíz?</p>
+            <div class="options-list">
+                <button class="opt-btn" onclick="checkComprension(this, false, 'No, las visitas al hospital son un EFECTO (hojas) de los accidentes.')">
+                    <span>🏥</span> Aumento en visitas al hospital por golpes.
+                </button>
+                <button class="opt-btn" onclick="checkComprension(this, true, '¡Exacto! La falta de ciclovías seguras es la CAUSA (raíz) que origina que ocurran los accidentes.')">
+                    <span>🚲</span> No existen ciclovías ni señalización para bicis.
+                </button>
+                <button class="opt-btn" onclick="checkComprension(this, false, '¡Prueba otra vez! El miedo a salir es un EFECTO (hojas) de la situación.')">
+                    <span>😟</span> Los vecinos tienen miedo de salir a pedalear.
+                </button>
+            </div>
+            <div id="fb-comprension" class="feedback-box"></div>
+        </div>
+
+        <!-- 8️⃣ JUEGO EDUCATIVO -->
+        <div class="slide" id="juego-slide">
+            <h2>Paso a Paso</h2>
+            <p>¿Cómo se construye el árbol? Toca los pasos en el orden correcto del 1 al 3:</p>
+            <div class="order-container">
+                <div class="order-item" onclick="clickStep(this, 2, 'C')">
+                    <span>Encontrar las causas (¿Por qué ocurre?)</span>
+                    <span class="order-num" id="step-C">-</span>
+                </div>
+                <div class="order-item" onclick="clickStep(this, 1, 'A')">
+                    <span>Definir el problema central (¿Qué está pasando?)</span>
+                    <span class="order-num" id="step-A">-</span>
+                </div>
+                <div class="order-item" onclick="clickStep(this, 3, 'B')">
+                    <span>Identificar las consecuencias (¿Qué efectos produce?)</span>
+                    <span class="order-num" id="step-B">-</span>
+                </div>
+            </div>
+            <div id="fb-juego" class="feedback-box"></div>
+        </div>
+
+        <!-- 9️⃣ APLICACIÓN PRÁCTICA -->
+        <div class="slide" id="aplicacion-slide">
+            <h2>Caso Práctico de Vecindario</h2>
+            <p>En el barrio de Ana, el parque se queda oscuro de noche. Muchas lámparas se fundieron y el municipio no las ha cambiado. Los vecinos ya no van a caminar allí.</p>
+            <p>Como ciudadano activo, ¿dónde deberías enfocar el primer esfuerzo de solución?</p>
+            <div class="options-list">
+                <button class="opt-btn" onclick="checkAplicacion(this, false, 'Si solo van de día, el parque sigue estando a oscuras por la noche. ¡Ataca la raíz!')">
+                    <span>☀️</span> Decirle a la gente que solo use el parque de día.
+                </button>
+                <button class="opt-btn" onclick="checkAplicacion(this, true, '¡Magnífico! Al reparar la lámpara solucionas la causa principal, devolviendo la luz al parque.')">
+                    <span>🛠️</span> Solicitar la reparación de las lámparas fundidas.
+                </button>
+            </div>
+            <div id="fb-aplicacion" class="feedback-box"></div>
+        </div>
+
+        <!-- 🔟 REPASO FINAL -->
+        <div class="slide" id="repaso-slide">
+            <h2>Repaso de Conceptos</h2>
+            <p>¿Qué pasa si intentamos resolver un problema comunitario atacando solo los efectos (hojas) y no las causas (raíces)?</p>
+            <div class="options-list">
+                <button class="opt-btn" onclick="checkRepaso(this, true, '¡Así es! Si no eliminas la raíz, el problema volverá a brotar una y otra vez.')">
+                    <span>🔁</span> El problema reaparecerá pronto porque su origen sigue intacto.
+                </button>
+                <button class="opt-btn" onclick="checkRepaso(this, false, 'No, al contrario. Desperdiciaremos recursos sin resolver nada de verdad.')">
+                    <span>✨</span> Se resolverá para siempre de forma exitosa.
+                </button>
+            </div>
+            <div id="fb-repaso" class="feedback-box"></div>
+        </div>
+
+        <!-- 1️⃣1️⃣ METACOGNICIÓN -->
+        <div class="slide">
+            <h2>Reflexiono sobre mi Aprendizaje</h2>
+            <p>Tómate un minuto para pensar en estas preguntas claves:</p>
+            <div style="text-align: left; background: var(--blanco); padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; width: 100%; max-width: 600px;">
+                <p style="margin-bottom: 10px; font-weight: bold;">🌱 ¿Qué aprendí hoy sobre los problemas sociales?</p>
+                <p style="margin-bottom: 0; font-weight: bold;">💡 ¿Cómo puedo aplicar el árbol de problemas en mi vida diaria o escuela?</p>
+            </div>
+            <p style="font-style: italic; font-size: 0.95rem; color: var(--rojo-ladrillo);">¡Pensar en el origen de las cosas nos hace más comprensivos y analíticos!</p>
+        </div>
+
+        <!-- 1️⃣2️⃣ CIERRE Y RECONOCIMIENTO -->
+        <div class="slide">
+            <div class="stamp">ESCOLARIS<br>CIUDADANO</div>
+            <h1>¡Lo lograste!</h1>
+            <p>Completaste exitosamente la Lección 10.</p>
+            <p>Ahora cuentas con el poder de usar el <strong>Árbol de Problemas</strong> para transformar de manera positiva tu entorno.</p>
+            <div class="sub-tag" style="background-color: var(--naranja-vibrante); color: white;">¡Felicidades, Guardia de la Comunidad! 🌟</div>
+        </div>
+
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+</div>
+
+<script>
+    // Configuración del Carrusel
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
+
+    function updateSlides() {
+        slides.forEach((slide, idx) => {
+            if (idx === currentSlideIndex) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+
+        // Habilitar o deshabilitar flechas
+        prevBtn.disabled = currentSlideIndex === 0;
+        nextBtn.disabled = currentSlideIndex === slides.length - 1;
+
+        // Progreso de lectura
+        const progressPercent = ((currentSlideIndex + 1) / slides.length) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+    }
+
+    function navigate(step) {
+        currentSlideIndex += step;
+        if (currentSlideIndex < 0) currentSlideIndex = 0;
+        if (currentSlideIndex >= slides.length) currentSlideIndex = slides.length - 1;
+        updateSlides();
+    }
+
+    // --- 3️⃣ Lógica de Activación ---
+    function checkActivation(btn, isCorrect) {
+        const feedback = document.getElementById('fb-activation');
+        const slide = btn.closest('.slide');
+        const buttons = slide.querySelectorAll('.opt-btn');
+        
+        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+
+        if (isCorrect) {
+            btn.classList.add('correct-choice');
+            feedback.className = "feedback-box correct";
+            feedback.innerHTML = "¡Exactamente! Cuidar la raíz asegura que toda la planta crezca sana de nuevo. ¡De eso se trata la lección!";
+        } else {
+            btn.classList.add('incorrect-choice');
+            feedback.className = "feedback-box incorrect";
+            feedback.innerHTML = "Eso solucionaría la apariencia por un rato, pero la planta seguirá sin salud bajo la tierra. ¡Inténtalo de nuevo! <br><button class='retry-btn' onclick='resetSlide(\"fb-activation\")'>Reintentar</button>";
+        }
+        feedback.style.display = 'block';
+    }
+
+    // --- 6️⃣ Explorador de Árbol ---
+    function exploreTree(section, descText) {
+        document.getElementById('exploreText').innerText = descText;
+    }
+
+    // --- 7️⃣ Actividad de Comprensión ---
+    function checkComprension(btn, isCorrect, text) {
+        const feedback = document.getElementById('fb-comprension');
+        const slide = document.getElementById('comprension-slide');
+        const buttons = slide.querySelectorAll('.opt-btn');
+
+        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+
+        if(isCorrect) {
+            btn.classList.add('correct-choice');
+            feedback.className = "feedback-box correct";
+            feedback.innerHTML = text;
+        } else {
+            btn.classList.add('incorrect-choice');
+            feedback.className = "feedback-box incorrect";
+            feedback.innerHTML = text + " <br><button class='retry-btn' onclick='resetSlide(\"fb-comprension\")'>Volver a intentar</button>";
+        }
+        feedback.style.display = 'block';
+    }
+
+    // --- 8️⃣ Juego Ordenar Secuencia ---
+    let orderSequence = [];
+    function clickStep(element, stepNum, letter) {
+        const numSpan = document.getElementById('step-' + letter);
+        
+        // Si ya fue seleccionado, ignorar clic para evitar duplicados en la lógica simple
+        if (numSpan.innerText !== '-') return;
+
+        orderSequence.push(stepNum);
+        numSpan.innerText = orderSequence.length;
+
+        if (orderSequence.length === 3) {
+            const feedback = document.getElementById('fb-juego');
+            // La secuencia correcta debe ser: 1, 2, 3 en el orden en que hicieron clic.
+            // Los elementos tienen asignados: item C -> paso 2, item A -> paso 1, item B -> paso 3.
+            // Si el usuario hace click en A, luego en C, luego en B, la secuencia de pasos es [1, 2, 3].
+            if (orderSequence[0] === 1 && orderSequence[1] === 2 && orderSequence[2] === 3) {
+                feedback.className = "feedback-box correct";
+                feedback.innerHTML = "¡Fabuloso! Primero defines el problema (tronco), luego encuentras sus causas (raíces) y finalmente mides sus consecuencias (hojas).";
+            } else {
+                feedback.className = "feedback-box incorrect";
+                feedback.innerHTML = "Ese orden puede confundirte al armar el esquema. ¡Recuerda el tronco es primero! <br><button class='retry-btn' onclick='resetOrder()'>Reiniciar juego</button>";
+            }
+            feedback.style.display = 'block';
+        }
+    }
+
+    function resetOrder() {
+        orderSequence = [];
+        ['A', 'B', 'C'].forEach(l => {
+            document.getElementById('step-' + l).innerText = '-';
+        });
+        document.getElementById('fb-juego').style.display = 'none';
+    }
+
+    // --- 9️⃣ Aplicación Práctica ---
+    function checkAplicacion(btn, isCorrect, text) {
+        const feedback = document.getElementById('fb-aplicacion');
+        const slide = document.getElementById('aplicacion-slide');
+        const buttons = slide.querySelectorAll('.opt-btn');
+
+        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+
+        if (isCorrect) {
+            btn.classList.add('correct-choice');
+            feedback.className = "feedback-box correct";
+            feedback.innerHTML = text;
+        } else {
+            btn.classList.add('incorrect-choice');
+            feedback.className = "feedback-box incorrect";
+            feedback.innerHTML = text + " <br><button class='retry-btn' onclick='resetSlide(\"fb-aplicacion\")'>Reintentar</button>";
+        }
+        feedback.style.display = 'block';
+    }
+
+    // --- 🔟 Repaso Final ---
+    function checkRepaso(btn, isCorrect, text) {
+        const feedback = document.getElementById('fb-repaso');
+        const slide = document.getElementById('repaso-slide');
+        const buttons = slide.querySelectorAll('.opt-btn');
+
+        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+
+        if (isCorrect) {
+            btn.classList.add('correct-choice');
+            feedback.className = "feedback-box correct";
+            feedback.innerHTML = text;
+        } else {
+            btn.classList.add('incorrect-choice');
+            feedback.className = "feedback-box incorrect";
+            feedback.innerHTML = text + " <br><button class='retry-btn' onclick='resetSlide(\"fb-repaso\")'>Intenta otra opción</button>";
+        }
+        feedback.style.display = 'block';
+    }
+
+    // Resets Genéricos de Actividades
+    function resetSlide(feedbackId) {
+        const feedback = document.getElementById(feedbackId);
+        feedback.style.display = 'none';
+        const slide = feedback.closest('.slide');
+        const buttons = slide.querySelectorAll('.opt-btn');
+        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+    }
+
+    // Inicializar visualización de inicio
+    updateSlides();
+</script>
+</body>
+</html>
