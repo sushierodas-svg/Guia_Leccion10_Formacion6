@@ -7,16 +7,19 @@
     <style>
         /* Variables de Identidad Visual Escolaris */
         :root {
-            --naranja-vibrante: #db6015;
-            --amarillo-calido: #f7be00;
+            --naranja: #db6015;
+            --amarillo: #f7be00;
             --azul-oscuro: #244b5a;
             --rojo-ladrillo: #993921;
-            --azul-claro: #f0f8ff;
+            --fondo-claro: #f0f8ff;
             --blanco: #ffffff;
-            --transparente-oscuro: rgba(36, 75, 90, 0.1);
+            --gris-texto: #333333;
+            --verde-hojas: #2e7d32;
+            --marron-tronco: #795548;
+            --marron-raices: #3e2723;
         }
 
-        /* Reset y General */
+        /* Reset y Estilos Globales */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -33,25 +36,26 @@
             align-items: center;
             min-height: 100vh;
             padding: 10px;
+            overflow: hidden;
         }
 
-        /* Contenedor optimizado para iFrame en Canvas */
+        /* Contenedor optimizado para iFrame en Canvas LMS (Esquinas redondeadas fluidas) */
         .canvas-container {
             width: 100%;
-            max-width: 850px;
-            height: 580px;
-            background-color: var(--azul-claro);
+            max-width: 820px;
+            height: 550px;
+            background-color: var(--fondo-claro);
             position: relative;
             border-radius: 16px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
             overflow: hidden;
-            border: 4px solid var(--azul-oscuro);
             display: flex;
             flex-direction: column;
+            border: 4px solid var(--azul-oscuro);
         }
 
-        /* Área de diapositivas */
-        .slides-wrapper {
+        /* Contenedor de Diapositivas */
+        .slides-container {
             flex: 1;
             position: relative;
             width: 100%;
@@ -64,11 +68,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 40px 80px;
+            padding: 30px 70px;
             opacity: 0;
             pointer-events: none;
-            transform: translateX(50px);
-            transition: all 0.4s ease-out;
+            transform: scale(0.98);
+            transition: opacity 0.3s ease, transform 0.3s ease;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -79,47 +83,19 @@
         .slide.active {
             opacity: 1;
             pointer-events: auto;
-            transform: translateX(0);
+            transform: scale(1);
         }
 
-        /* Elementos del Tema */
-        h1 {
-            color: var(--naranja-vibrante);
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        h2 {
-            color: var(--azul-oscuro);
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        p {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: var(--azul-oscuro);
-            max-width: 650px;
-            margin-bottom: 20px;
-        }
-
-        strong {
-            color: var(--naranja-vibrante);
-        }
-
-        /* Flechas de Navegación Lateral */
+        /* Navegación mediante Flechas Laterales Grandes */
         .nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             background-color: var(--blanco);
             border: 3px solid var(--azul-oscuro);
-            font-size: 28px;
-            width: 55px;
-            height: 55px;
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -131,64 +107,67 @@
         }
 
         .nav-btn:hover {
-            background-color: var(--amarillo-calido);
-            transform: translateY(-50%) scale(1.1);
+            background-color: var(--amarillo);
+            transform: translateY(-50%) scale(1.08);
         }
 
         .nav-btn:active {
-            transform: translateY(-50%) scale(0.9);
+            transform: translateY(-50%) scale(0.95);
         }
 
-        .nav-btn.prev {
-            left: 15px;
-        }
-
-        .nav-btn.next {
-            right: 15px;
-        }
-
+        .nav-btn.prev { left: 15px; }
+        .nav-btn.next { right: 15px; }
         .nav-btn:disabled {
             opacity: 0;
             pointer-events: none;
         }
 
-        /* Barra de Progreso Discreta */
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background-color: rgba(36, 75, 90, 0.2);
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            z-index: 10;
+        /* Tipografías e Insignias */
+        h1 {
+            color: var(--naranja);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            line-height: 1.2;
         }
 
-        .progress-bar {
-            height: 100%;
-            background-color: var(--naranja-vibrante);
-            width: 8.33%; /* 1/12 por defecto */
-            transition: width 0.4s ease;
+        h2 {
+            color: var(--azul-oscuro);
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
-        /* Insignias e Indicadores */
-        .header-tag {
+        p {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--gris-texto);
+            max-width: 620px;
+            margin-bottom: 15px;
+        }
+
+        strong {
+            color: var(--naranja);
+        }
+
+        .badge-main {
             background-color: var(--azul-oscuro);
             color: var(--blanco);
-            padding: 6px 16px;
+            padding: 4px 14px;
             border-radius: 50px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
+            margin-bottom: 10px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .sub-tag {
-            background-color: var(--amarillo-calido);
+        .badge-sub {
+            background-color: var(--amarillo);
             color: var(--azul-oscuro);
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             margin-bottom: 15px;
         }
@@ -196,81 +175,82 @@
         /* Tarjetas de Contenido */
         .card-grid {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             width: 100%;
-            max-width: 680px;
+            max-width: 650px;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .info-card {
             background-color: var(--blanco);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 15px;
             flex: 1;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-            border-top: 5px solid var(--naranja-vibrante);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-bottom: 5px solid var(--naranja);
             transition: transform 0.2s;
         }
 
         .info-card h3 {
             color: var(--azul-oscuro);
-            margin-bottom: 10px;
-            font-size: 1.15rem;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
         }
 
-        /* Botones de opción interactiva */
+        /* Botones de Opción Interactiva */
         .options-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            max-width: 550px;
+            max-width: 500px;
         }
 
         .opt-btn {
             background-color: var(--blanco);
             border: 2px solid var(--azul-oscuro);
             color: var(--azul-oscuro);
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 1rem;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             text-align: left;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .opt-btn:hover {
-            background-color: #f7be0033;
-            border-color: var(--naranja-vibrante);
+            background-color: rgba(247, 190, 0, 0.15);
+            border-color: var(--naranja);
         }
 
-        .opt-btn.correct-choice {
+        .opt-btn.correct-style {
             background-color: #d4edda !important;
             border-color: #28a745 !important;
             color: #155724;
         }
 
-        .opt-btn.incorrect-choice {
+        .opt-btn.incorrect-style {
             background-color: #f8d7da !important;
             border-color: #dc3545 !important;
             color: #721c24;
         }
 
-        /* Paneles de retroalimentación */
+        /* Cuadros de Retroalimentación Activa */
         .feedback-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
             width: 100%;
-            max-width: 550px;
+            max-width: 500px;
             display: none;
-            animation: fadeIn 0.3s ease;
             font-weight: 600;
+            font-size: 0.9rem;
+            animation: popIn 0.3s ease;
         }
 
         .feedback-box.correct {
@@ -285,115 +265,99 @@
             border: 2px solid #dc3545;
         }
 
-        .retry-btn {
+        .action-retry-btn {
             background-color: var(--rojo-ladrillo);
             color: var(--blanco);
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            margin-top: 10px;
+            padding: 6px 12px;
+            border-radius: 5px;
+            margin-top: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.85rem;
             transition: background 0.2s;
         }
 
-        .retry-btn:hover {
+        .action-retry-btn:hover {
             background-color: #b03e27;
         }
 
-        /* Ilustración Árbol Interactivo (CSS Puro) */
+        /* Exploración Visual del Árbol Interactiva */
         .tree-explorer {
             position: relative;
             width: 100%;
-            max-width: 500px;
-            height: 320px;
-            margin: 10px auto;
+            max-width: 440px;
+            height: 240px;
+            margin: 5px auto;
             background: var(--blanco);
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 15px;
+            padding: 10px;
         }
 
-        .tree-section {
+        .tree-part {
             width: 100%;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: var(--blanco);
+            font-size: 0.95rem;
             transition: all 0.2s ease;
-            position: relative;
         }
 
-        .tree-section:hover {
+        .tree-part:hover {
             transform: scale(1.02);
             filter: brightness(1.1);
         }
 
-        .sec-leaves {
-            height: 90px;
-            background-color: #2e7d32;
+        .tree-leaves {
+            height: 70px;
+            background-color: var(--verde-hojas);
             border: 3px solid #1b5e20;
         }
 
-        .sec-trunk {
-            height: 80px;
-            background-color: #795548;
+        .tree-trunk {
+            height: 60px;
+            background-color: var(--marron-tronco);
             border: 3px solid #5d4037;
-            width: 60%;
+            width: 55%;
             margin: 0 auto;
         }
 
-        .sec-roots {
-            height: 90px;
-            background-color: #3e2723;
+        .tree-roots {
+            height: 70px;
+            background-color: var(--marron-raices);
             border: 3px solid #270f0f;
         }
 
-        .explorer-desc {
-            min-height: 50px;
+        .explorer-explanation {
+            min-height: 45px;
             margin-top: 10px;
             font-weight: bold;
             color: var(--azul-oscuro);
-            font-size: 1.1rem;
-        }
-
-        /* Sello final */
-        .stamp {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            border: 5px dashed var(--amarillo-calido);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: var(--naranja-vibrante);
-            font-size: 1.1rem;
-            transform: rotate(-10deg);
-            margin: 20px auto;
-            background: rgba(247, 190, 0, 0.1);
-            animation: pulse 2s infinite;
-        }
-
-        /* Ordenar por clics */
-        .order-container {
-            display: flex;
-            gap: 10px;
-            flex-direction: column;
-            width: 100%;
+            font-size: 0.95rem;
             max-width: 500px;
         }
 
-        .order-item {
+        /* Juego de Ordenar Secuencia */
+        .sequence-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .sequence-item {
             background-color: var(--blanco);
             border: 2px dashed var(--azul-oscuro);
-            padding: 12px;
+            padding: 10px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -401,71 +365,107 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.2s;
         }
 
-        .order-num {
-            background-color: var(--amarillo-calido);
+        .sequence-badge {
+            background-color: var(--amarillo);
             color: var(--azul-oscuro);
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        /* Sello Final */
+        .achievement-seal {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 4px dashed var(--amarillo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--naranja);
+            font-size: 0.95rem;
+            transform: rotate(-8deg);
+            margin: 15px auto;
+            background: rgba(247, 190, 0, 0.1);
+            animation: floatGently 3s infinite ease-in-out;
+        }
+
+        /* Barra de Progreso Discreta */
+        .progress-indicator {
+            width: 100%;
+            height: 5px;
+            background-color: rgba(36, 75, 90, 0.15);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--naranja);
+            width: 8.33%;
+            transition: width 0.3s ease;
         }
 
         /* Animaciones */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
+        @keyframes popIn {
+            from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1) rotate(-10deg); }
-            50% { transform: scale(1.05) rotate(-10deg); }
-            100% { transform: scale(1) rotate(-10deg); }
+        @keyframes floatGently {
+            0%, 100% { transform: translateY(0) rotate(-8deg); }
+            50% { transform: translateY(-6px) rotate(-8deg); }
         }
     </style>
 </head>
 <body>
 
 <div class="canvas-container">
-    <!-- Flechas de navegación -->
+    <!-- Flechas de navegación lateral -->
     <button class="nav-btn prev" id="prevBtn" onclick="navigate(-1)">⬅️</button>
     <button class="nav-btn next" id="nextBtn" onclick="navigate(1)">➡️</button>
 
-    <div class="slides-wrapper">
+    <div class="slides-container">
 
         <!-- 1️⃣ PORTADA MOTIVADORA -->
         <div class="slide active">
-            <div class="header-tag">Formación Ciudadana</div>
-            <div class="sub-tag">Lección 10 • 6° Primaria</div>
+            <div class="badge-main">Formación Ciudadana</div>
+            <div class="badge-sub">Lección 10 • 6° Primaria</div>
             <h1>El Árbol de Problemas</h1>
             <p>¡Hola! Te damos la bienvenida a una aventura interactiva para aprender a analizar desafíos de tu comunidad como todo un experto. ¿Listo para descubrir el poder de este árbol?</p>
-            <div style="font-size: 70px; margin-top: 10px;">🌳🕵️‍♂️</div>
+            <div style="font-size: 60px; margin-top: 10px;">🌳🕵️‍♂️</div>
         </div>
 
         <!-- 2️⃣ OBJETIVOS DE APRENDIZAJE -->
         <div class="slide">
             <h2>Nuestros Objetivos de Hoy</h2>
-            <p>Al terminar esta maravillosa guía digital, serás súper capaz de:</p>
+            <p>Al terminar esta maravillosa guía digital, serás capaz de:</p>
             <div class="card-grid">
                 <div class="info-card">
-                    <div style="font-size: 40px; margin-bottom: 10px;">🗺️</div>
+                    <div style="font-size: 35px; margin-bottom: 8px;">🗺️</div>
                     <h3>Mapear desafíos</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 0;">Entender la diferencia entre la raíz de una situación y sus síntomas visibles.</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">Entender la diferencia entre la raíz de una situación y sus síntomas visibles.</p>
                 </div>
-                <div class="info-card" style="border-top-color: var(--amarillo-calido);">
-                    <div style="font-size: 40px; margin-bottom: 10px;">💡</div>
+                <div class="info-card" style="border-bottom-color: var(--amarillo);">
+                    <div style="font-size: 35px; margin-bottom: 8px;">💡</div>
                     <h3>Proponer soluciones</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 0;">Atacar los problemas directo en su origen para lograr cambios duraderos.</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">Atacar los problemas directo en su origen para lograr cambios duraderos.</p>
                 </div>
             </div>
         </div>
 
         <!-- 3️⃣ ACTIVACIÓN DE CONOCIMIENTOS PREVIOS -->
-        <div class="slide">
+        <div class="slide" id="slide-3">
             <h2>Activación: ¡Para Pensar!</h2>
             <p>Imagínate que las hojas de una planta en tu ventana se vuelven amarillas y se secan. ¿Qué harías primero para solucionarlo de verdad?</p>
             <div class="options-list">
@@ -484,17 +484,17 @@
             <h2>Nuestras Palabras Clave</h2>
             <p>Tres conceptos indispensables que usaremos todo el tiempo:</p>
             <div class="card-grid">
-                <div class="info-card" style="border-top-color: var(--azul-oscuro);">
+                <div class="info-card" style="border-bottom-color: var(--azul-oscuro);">
                     <h3>🌳 El Problema</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">Es el conflicto o necesidad principal de la comunidad que deseamos resolver.</p>
+                    <p style="font-size: 0.85rem; margin: 0;">Es el conflicto o necesidad principal de la comunidad que deseamos resolver.</p>
                 </div>
-                <div class="info-card" style="border-top-color: var(--rojo-ladrillo);">
+                <div class="info-card" style="border-bottom-color: var(--rojo-ladrillo);">
                     <h3>🌱 La Causa</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">La razón profunda u origen que produce el problema.</p>
+                    <p style="font-size: 0.85rem; margin: 0;">La razón profunda u origen que produce el problema.</p>
                 </div>
-                <div class="info-card" style="border-top-color: var(--amarillo-calido);">
+                <div class="info-card" style="border-bottom-color: var(--amarillo);">
                     <h3>🍂 El Efecto</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">La consecuencia o impacto directo que genera el problema.</p>
+                    <p style="font-size: 0.85rem; margin: 0;">La consecuencia o impacto directo que genera el problema.</p>
                 </div>
             </div>
         </div>
@@ -504,7 +504,7 @@
             <h2>¿Qué es el Árbol de Problemas?</h2>
             <p>Es una <strong>herramienta visual</strong> con forma de árbol que sirve para organizar ideas.</p>
             <p>Nos permite analizar un problema comunitario dividiéndolo en sus partes esenciales para que sea más fácil de solucionar. Se utiliza en todo el mundo por gobiernos y equipos vecinales.</p>
-            <div style="font-size: 60px;">📊🔍</div>
+            <div style="font-size: 55px; margin-top: 10px;">📊🔍</div>
         </div>
 
         <!-- 6️⃣ EXPLORACIÓN VISUAL -->
@@ -512,31 +512,31 @@
             <h2>¡Haz clic para Explorar!</h2>
             <p>Toca cada parte del árbol para ver qué parte del problema representa:</p>
             <div class="tree-explorer">
-                <div class="tree-section sec-leaves" onclick="exploreTree('leaves', '🍂 HOJAS Y RAMAS = EFECTOS: Son los resultados de la situación, lo que el vecindario siente directamente (ej. contaminación, tristeza, inseguridad).')">
+                <div class="tree-part tree-leaves" onclick="exploreTree('🍂 HOJAS Y RAMAS = EFECTOS: Son las consecuencias de la situación, lo que el vecindario siente directamente (ej. tristeza, inseguridad).')">
                     Hojas y Ramas (Efectos)
                 </div>
-                <div class="tree-section sec-trunk" onclick="exploreTree('trunk', '🌳 TRONCO = PROBLEMA CENTRAL: Es la situación específica que queremos analizar (ej. Acumulación de basura en el parque).')">
+                <div class="tree-part tree-trunk" onclick="exploreTree('🌳 TRONCO = PROBLEMA CENTRAL: Es el desafío específico que deseamos analizar (ej. Acumulación de basura en el parque).')">
                     Tronco (Problema Central)
                 </div>
-                <div class="tree-section sec-roots" onclick="exploreTree('roots', '🌱 RAÍCES = CAUSAS: Son los motivos profundos que generaron el problema (ej. Falta de botes de basura, poca educación ambiental).')">
+                <div class="tree-part tree-roots" onclick="exploreTree('🌱 RAÍCES = CAUSAS: Son los motivos profundos que provocaron el problema (ej. Falta de botes de basura, poca educación).')">
                     Raíces (Causas Raíz)
                 </div>
             </div>
-            <div class="explorer-desc" id="exploreText">¡Toca una parte del árbol para comenzar!</div>
+            <div class="explorer-explanation" id="exploreText">¡Toca una parte del árbol para comenzar!</div>
         </div>
 
         <!-- 7️⃣ ACTIVIDAD DE COMPRENSIÓN -->
-        <div class="slide" id="comprension-slide">
+        <div class="slide" id="slide-7">
             <h2>¿Cuál es la Raíz?</h2>
-            <p>Si el problema central es: <strong>"Los accidentes en bicicleta han aumentado en la calle principal"</strong>. ¿Cuál de las siguientes opciones representa la causa o raíz?</p>
+            <p>Si el problema central es: <strong>"Los accidentes en bicicleta han aumentado en la calle principal"</strong>. ¿Cuál representa la causa o raíz?</p>
             <div class="options-list">
                 <button class="opt-btn" onclick="checkComprension(this, false, 'No, las visitas al hospital son un EFECTO (hojas) de los accidentes.')">
                     <span>🏥</span> Aumento en visitas al hospital por golpes.
                 </button>
-                <button class="opt-btn" onclick="checkComprension(this, true, '¡Exacto! La falta de ciclovías seguras es la CAUSA (raíz) que origina que ocurran los accidentes.')">
+                <button class="opt-btn" onclick="checkComprension(this, true, '¡Exacto! La falta de vías especiales es la CAUSA (raíz) que origina que ocurran los accidentes.')">
                     <span>🚲</span> No existen ciclovías ni señalización para bicis.
                 </button>
-                <button class="opt-btn" onclick="checkComprension(this, false, '¡Prueba otra vez! El miedo a salir es un EFECTO (hojas) de la situación.')">
+                <button class="opt-btn" onclick="checkComprension(this, false, '¡Prueba otra vez! El miedo a salir es un EFECTO (hojas) provocado por el peligro.')">
                     <span>😟</span> Los vecinos tienen miedo de salir a pedalear.
                 </button>
             </div>
@@ -544,36 +544,35 @@
         </div>
 
         <!-- 8️⃣ JUEGO EDUCATIVO -->
-        <div class="slide" id="juego-slide">
+        <div class="slide" id="slide-8">
             <h2>Paso a Paso</h2>
             <p>¿Cómo se construye el árbol? Toca los pasos en el orden correcto del 1 al 3:</p>
-            <div class="order-container">
-                <div class="order-item" onclick="clickStep(this, 2, 'C')">
+            <div class="sequence-list">
+                <div class="sequence-item" onclick="clickStep(this, 2, 'C')">
                     <span>Encontrar las causas (¿Por qué ocurre?)</span>
-                    <span class="order-num" id="step-C">-</span>
+                    <span class="sequence-badge" id="step-C">-</span>
                 </div>
-                <div class="order-item" onclick="clickStep(this, 1, 'A')">
+                <div class="sequence-item" onclick="clickStep(this, 1, 'A')">
                     <span>Definir el problema central (¿Qué está pasando?)</span>
-                    <span class="order-num" id="step-A">-</span>
+                    <span class="sequence-badge" id="step-A">-</span>
                 </div>
-                <div class="order-item" onclick="clickStep(this, 3, 'B')">
+                <div class="sequence-item" onclick="clickStep(this, 3, 'B')">
                     <span>Identificar las consecuencias (¿Qué efectos produce?)</span>
-                    <span class="order-num" id="step-B">-</span>
+                    <span class="sequence-badge" id="step-B">-</span>
                 </div>
             </div>
             <div id="fb-juego" class="feedback-box"></div>
         </div>
 
         <!-- 9️⃣ APLICACIÓN PRÁCTICA -->
-        <div class="slide" id="aplicacion-slide">
+        <div class="slide" id="slide-9">
             <h2>Caso Práctico de Vecindario</h2>
-            <p>En el barrio de Ana, el parque se queda oscuro de noche. Muchas lámparas se fundieron y el municipio no las ha cambiado. Los vecinos ya no van a caminar allí.</p>
-            <p>Como ciudadano activo, ¿dónde deberías enfocar el primer esfuerzo de solución?</p>
+            <p>En el barrio de Ana, el parque se queda oscuro de noche porque muchas lámparas se quemaron. Como ciudadano activo, ¿dónde debes enfocar la solución?</p>
             <div class="options-list">
-                <button class="opt-btn" onclick="checkAplicacion(this, false, 'Si solo van de día, el parque sigue estando a oscuras por la noche. ¡Ataca la raíz!')">
-                    <span>☀️</span> Decirle a la gente que solo use el parque de día.
+                <button class="opt-btn" onclick="checkAplicacion(this, false, 'Pedir que solo vayan de día evita el parque oscuro de noche, pero no arregla la raíz de la oscuridad.')">
+                    <span>☀️</span> Recomendar a la gente usar el parque solo de día.
                 </button>
-                <button class="opt-btn" onclick="checkAplicacion(this, true, '¡Magnífico! Al reparar la lámpara solucionas la causa principal, devolviendo la luz al parque.')">
+                <button class="opt-btn" onclick="checkAplicacion(this, true, '¡Magnífico! Al reemplazar los focos quemados resuelves la causa raíz que genera la oscuridad.')">
                     <span>🛠️</span> Solicitar la reparación de las lámparas fundidas.
                 </button>
             </div>
@@ -581,14 +580,14 @@
         </div>
 
         <!-- 🔟 REPASO FINAL -->
-        <div class="slide" id="repaso-slide">
+        <div class="slide" id="slide-10">
             <h2>Repaso de Conceptos</h2>
             <p>¿Qué pasa si intentamos resolver un problema comunitario atacando solo los efectos (hojas) y no las causas (raíces)?</p>
             <div class="options-list">
-                <button class="opt-btn" onclick="checkRepaso(this, true, '¡Así es! Si no eliminas la raíz, el problema volverá a brotar una y otra vez.')">
+                <button class="opt-btn" onclick="checkRepaso(this, true, '¡Así es! Si no eliminas la raíz del problema, este volverá a manifestarse pronto.')">
                     <span>🔁</span> El problema reaparecerá pronto porque su origen sigue intacto.
                 </button>
-                <button class="opt-btn" onclick="checkRepaso(this, false, 'No, al contrario. Desperdiciaremos recursos sin resolver nada de verdad.')">
+                <button class="opt-btn" onclick="checkRepaso(this, false, 'No, todo lo contrario. Gastaríamos esfuerzo sin corregir el verdadero conflicto.')">
                     <span>✨</span> Se resolverá para siempre de forma exitosa.
                 </button>
             </div>
@@ -599,39 +598,45 @@
         <div class="slide">
             <h2>Reflexiono sobre mi Aprendizaje</h2>
             <p>Tómate un minuto para pensar en estas preguntas claves:</p>
-            <div style="text-align: left; background: var(--blanco); padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; width: 100%; max-width: 600px;">
-                <p style="margin-bottom: 10px; font-weight: bold;">🌱 ¿Qué aprendí hoy sobre los problemas sociales?</p>
-                <p style="margin-bottom: 0; font-weight: bold;">💡 ¿Cómo puedo aplicar el árbol de problemas en mi vida diaria o escuela?</p>
+            <div style="text-align: left; background: var(--blanco); padding: 12px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 12px; width: 100%; max-width: 580px;">
+                <p style="margin-bottom: 8px; font-weight: bold; font-size: 0.95rem;">🌱 ¿Qué aprendí hoy sobre los problemas de mi comunidad?</p>
+                <p style="margin-bottom: 0; font-weight: bold; font-size: 0.95rem;">💡 ¿Cómo puedo aplicar el árbol de problemas en mis proyectos escolares?</p>
             </div>
-            <p style="font-style: italic; font-size: 0.95rem; color: var(--rojo-ladrillo);">¡Pensar en el origen de las cosas nos hace más comprensivos y analíticos!</p>
+            <p style="font-style: italic; font-size: 0.9rem; color: var(--rojo-ladrillo);">¡Buscar la raíz de los desafíos cotidianos nos ayuda a ser mejores ciudadanos!</p>
         </div>
 
         <!-- 1️⃣2️⃣ CIERRE Y RECONOCIMIENTO -->
         <div class="slide">
-            <div class="stamp">ESCOLARIS<br>CIUDADANO</div>
+            <div class="achievement-seal">ESCOLARIS<br>CIUDADANO</div>
             <h1>¡Lo lograste!</h1>
             <p>Completaste exitosamente la Lección 10.</p>
-            <p>Ahora cuentas con el poder de usar el <strong>Árbol de Problemas</strong> para transformar de manera positiva tu entorno.</p>
-            <div class="sub-tag" style="background-color: var(--naranja-vibrante); color: white;">¡Felicidades, Guardia de la Comunidad! 🌟</div>
+            <p>Ahora cuentas con la gran habilidad de usar el <strong>Árbol de Problemas</strong> para transformar positivamente tu entorno.</p>
+            <div class="badge-sub" style="background-color: var(--naranja); color: white;">¡Felicidades, Líder Comunitario! 🌟</div>
         </div>
 
     </div>
 
-    <!-- Barra de progreso -->
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+    <!-- Barra de progreso discreta al fondo -->
+    <div class="progress-indicator">
+        <div class="progress-fill" id="progressBar"></div>
     </div>
 </div>
 
 <script>
-    // Configuración del Carrusel
+    // Variables de Estado del Carrusel
     let currentSlideIndex = 0;
     const slides = document.querySelectorAll('.slide');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const progressBar = document.getElementById('progressBar');
 
+    // Inicialización del sistema
+    window.onload = function() {
+        updateSlides();
+    };
+
     function updateSlides() {
+        // Alternar visualización de slides
         slides.forEach((slide, idx) => {
             if (idx === currentSlideIndex) {
                 slide.classList.add('active');
@@ -640,11 +645,11 @@
             }
         });
 
-        // Habilitar o deshabilitar flechas
+        // Configurar disponibilidad de flechas de control
         prevBtn.disabled = currentSlideIndex === 0;
         nextBtn.disabled = currentSlideIndex === slides.length - 1;
 
-        // Progreso de lectura
+        // Calcular porcentaje del recorrido del alumno
         const progressPercent = ((currentSlideIndex + 1) / slides.length) * 100;
         progressBar.style.width = `${progressPercent}%`;
     }
@@ -656,57 +661,57 @@
         updateSlides();
     }
 
-    // --- 3️⃣ Lógica de Activación ---
+    // --- 3️⃣ Lógica de Activación de Conocimientos Previos ---
     function checkActivation(btn, isCorrect) {
         const feedback = document.getElementById('fb-activation');
-        const slide = btn.closest('.slide');
+        const slide = document.getElementById('slide-3');
         const buttons = slide.querySelectorAll('.opt-btn');
         
-        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+        buttons.forEach(b => b.classList.remove('correct-style', 'incorrect-style'));
 
         if (isCorrect) {
-            btn.classList.add('correct-choice');
+            btn.classList.add('correct-style');
             feedback.className = "feedback-box correct";
-            feedback.innerHTML = "¡Exactamente! Cuidar la raíz asegura que toda la planta crezca sana de nuevo. ¡De eso se trata la lección!";
+            feedback.innerHTML = "¡Excelente elección! Revisar la tierra y las raíces soluciona el problema de fondo. De igual forma, en sociedad debemos atacar la causa.";
         } else {
-            btn.classList.add('incorrect-choice');
+            btn.classList.add('incorrect-style');
             feedback.className = "feedback-box incorrect";
-            feedback.innerHTML = "Eso solucionaría la apariencia por un rato, pero la planta seguirá sin salud bajo la tierra. ¡Inténtalo de nuevo! <br><button class='retry-btn' onclick='resetSlide(\"fb-activation\")'>Reintentar</button>";
+            feedback.innerHTML = "Eso solucionaría el aspecto por un momento, pero la planta se secará igual. ¡Inténtalo de nuevo! <br><button class='action-retry-btn' onclick='resetSlide(\"fb-activation\")'>Reintentar</button>";
         }
         feedback.style.display = 'block';
     }
 
-    // --- 6️⃣ Explorador de Árbol ---
-    function exploreTree(section, descText) {
+    // --- 6️⃣ Explorador Interactivo del Árbol ---
+    function exploreTree(descText) {
         document.getElementById('exploreText').innerText = descText;
     }
 
-    // --- 7️⃣ Actividad de Comprensión ---
+    // --- 7️⃣ Actividad de Comprensión Directa ---
     function checkComprension(btn, isCorrect, text) {
         const feedback = document.getElementById('fb-comprension');
-        const slide = document.getElementById('comprension-slide');
+        const slide = document.getElementById('slide-7');
         const buttons = slide.querySelectorAll('.opt-btn');
 
-        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+        buttons.forEach(b => b.classList.remove('correct-style', 'incorrect-style'));
 
-        if(isCorrect) {
-            btn.classList.add('correct-choice');
+        if (isCorrect) {
+            btn.classList.add('correct-style');
             feedback.className = "feedback-box correct";
             feedback.innerHTML = text;
         } else {
-            btn.classList.add('incorrect-choice');
+            btn.classList.add('incorrect-style');
             feedback.className = "feedback-box incorrect";
-            feedback.innerHTML = text + " <br><button class='retry-btn' onclick='resetSlide(\"fb-comprension\")'>Volver a intentar</button>";
+            feedback.innerHTML = text + " <br><button class='action-retry-btn' onclick='resetSlide(\"fb-comprension\")'>Intentar de nuevo</button>";
         }
         feedback.style.display = 'block';
     }
 
-    // --- 8️⃣ Juego Ordenar Secuencia ---
+    // --- 8️⃣ Juego Educativo: Ordenar Pasos de la Metodología ---
     let orderSequence = [];
     function clickStep(element, stepNum, letter) {
         const numSpan = document.getElementById('step-' + letter);
         
-        // Si ya fue seleccionado, ignorar clic para evitar duplicados en la lógica simple
+        // Si ya fue asignado un paso a este botón, no hacer nada
         if (numSpan.innerText !== '-') return;
 
         orderSequence.push(stepNum);
@@ -714,15 +719,15 @@
 
         if (orderSequence.length === 3) {
             const feedback = document.getElementById('fb-juego');
-            // La secuencia correcta debe ser: 1, 2, 3 en el orden en que hicieron clic.
-            // Los elementos tienen asignados: item C -> paso 2, item A -> paso 1, item B -> paso 3.
-            // Si el usuario hace click en A, luego en C, luego en B, la secuencia de pasos es [1, 2, 3].
+            // Verificamos si los clics del usuario corresponden al orden secuencial correcto (1, luego 2, luego 3)
+            // Botón A es paso 1, Botón C es paso 2, Botón B es paso 3.
+            // Para ganar, el orden de clics debió ser: primero el botón del paso 1, luego el del paso 2 y finalmente el del paso 3.
             if (orderSequence[0] === 1 && orderSequence[1] === 2 && orderSequence[2] === 3) {
                 feedback.className = "feedback-box correct";
-                feedback.innerHTML = "¡Fabuloso! Primero defines el problema (tronco), luego encuentras sus causas (raíces) y finalmente mides sus consecuencias (hojas).";
+                feedback.innerHTML = "¡Espectacular! Primero definimos qué está ocurriendo (tronco), luego encontramos por qué ocurre (raíces) y finalmente medimos las consecuencias (hojas).";
             } else {
                 feedback.className = "feedback-box incorrect";
-                feedback.innerHTML = "Ese orden puede confundirte al armar el esquema. ¡Recuerda el tronco es primero! <br><button class='retry-btn' onclick='resetOrder()'>Reiniciar juego</button>";
+                feedback.innerHTML = "¡Oh! Ese orden podría confundirte a la hora de estructurar tu proyecto. ¡Piénsalo de nuevo! <br><button class='action-retry-btn' onclick='resetOrder()'>Reiniciar juego</button>";
             }
             feedback.style.display = 'block';
         }
@@ -739,19 +744,19 @@
     // --- 9️⃣ Aplicación Práctica ---
     function checkAplicacion(btn, isCorrect, text) {
         const feedback = document.getElementById('fb-aplicacion');
-        const slide = document.getElementById('aplicacion-slide');
+        const slide = document.getElementById('slide-9');
         const buttons = slide.querySelectorAll('.opt-btn');
 
-        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+        buttons.forEach(b => b.classList.remove('correct-style', 'incorrect-style'));
 
         if (isCorrect) {
-            btn.classList.add('correct-choice');
+            btn.classList.add('correct-style');
             feedback.className = "feedback-box correct";
             feedback.innerHTML = text;
         } else {
-            btn.classList.add('incorrect-choice');
+            btn.classList.add('incorrect-style');
             feedback.className = "feedback-box incorrect";
-            feedback.innerHTML = text + " <br><button class='retry-btn' onclick='resetSlide(\"fb-aplicacion\")'>Reintentar</button>";
+            feedback.innerHTML = text + " <br><button class='action-retry-btn' onclick='resetSlide(\"fb-aplicacion\")'>Volver a intentar</button>";
         }
         feedback.style.display = 'block';
     }
@@ -759,34 +764,31 @@
     // --- 🔟 Repaso Final ---
     function checkRepaso(btn, isCorrect, text) {
         const feedback = document.getElementById('fb-repaso');
-        const slide = document.getElementById('repaso-slide');
+        const slide = document.getElementById('slide-10');
         const buttons = slide.querySelectorAll('.opt-btn');
 
-        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+        buttons.forEach(b => b.classList.remove('correct-style', 'incorrect-style'));
 
         if (isCorrect) {
-            btn.classList.add('correct-choice');
+            btn.classList.add('correct-style');
             feedback.className = "feedback-box correct";
             feedback.innerHTML = text;
         } else {
-            btn.classList.add('incorrect-choice');
+            btn.classList.add('incorrect-style');
             feedback.className = "feedback-box incorrect";
-            feedback.innerHTML = text + " <br><button class='retry-btn' onclick='resetSlide(\"fb-repaso\")'>Intenta otra opción</button>";
+            feedback.innerHTML = text + " <br><button class='action-retry-btn' onclick='resetSlide(\"fb-repaso\")'>Probar otra respuesta</button>";
         }
         feedback.style.display = 'block';
     }
 
-    // Resets Genéricos de Actividades
+    // Restablecimiento genérico para permitir retroalimentación con reintento
     function resetSlide(feedbackId) {
         const feedback = document.getElementById(feedbackId);
         feedback.style.display = 'none';
         const slide = feedback.closest('.slide');
         const buttons = slide.querySelectorAll('.opt-btn');
-        buttons.forEach(b => b.classList.remove('correct-choice', 'incorrect-choice'));
+        buttons.forEach(b => b.classList.remove('correct-style', 'incorrect-style'));
     }
-
-    // Inicializar visualización de inicio
-    updateSlides();
 </script>
 </body>
 </html>
